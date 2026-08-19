@@ -5,9 +5,22 @@ import (
 	"log"
 	"net/http"
 
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"backend-test/docs"
+
 	"github.com/gin-gonic/gin"
 )
 
+// @title Maintenance Request Log API
+// @version 1.0
+// @description API for maintenance request management.
+// @host localhost:8080
+// @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func ServeHTTP() {
 	dependency := dependencyInject()
 	router := gin.New()
@@ -16,6 +29,9 @@ func ServeHTTP() {
 	}
 	router.Use(gin.Logger(), gin.Recovery(), MiddlewareCORS())
 	router.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"status": "ok"}) })
+	docs.SwaggerInfo.Host = helpers.GetEnv("SWAGGER_HOST", "localhost:"+helpers.GetEnv("PORT", "8080"))
+	docs.SwaggerInfo.Schemes = []string{"http"}
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	apiGroup := router.Group("/api")
 	apiGroup.POST("/auth/login", dependency.AuthAPI.Login)
 	secured := apiGroup.Group("")
