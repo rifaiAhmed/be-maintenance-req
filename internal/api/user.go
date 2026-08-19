@@ -22,6 +22,19 @@ func userID(c *gin.Context) (uint, bool) {
 	}
 	return uint(id), true
 }
+
+// List godoc
+// @Summary List users
+// @Tags Users
+// @Produce json
+// @Param search query string false "Search keyword"
+// @Param role query string false "Role"
+// @Param status query string false "Status"
+// @Param page query int false "Page"
+// @Param limit query int false "Limit"
+// @Success 200 {object} map[string]interface{} "success"
+// @Security BearerAuth
+// @Router /users [get]
 func (h *UserHandler) List(c *gin.Context) {
 	page, limit := pagination(c)
 	users, meta, err := h.Service.List(c.Request.Context(), actor(c), c.Query("search"), c.Query("role"), c.Query("status"), page, limit)
@@ -31,6 +44,15 @@ func (h *UserHandler) List(c *gin.Context) {
 	}
 	respondList(c, users, meta)
 }
+
+// Get godoc
+// @Summary Get user by ID
+// @Tags Users
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} map[string]interface{} "success"
+// @Security BearerAuth
+// @Router /users/{id} [get]
 func (h *UserHandler) Get(c *gin.Context) {
 	id, ok := userID(c)
 	if !ok {
@@ -43,6 +65,17 @@ func (h *UserHandler) Get(c *gin.Context) {
 	}
 	respond(c, http.StatusOK, "success", user)
 }
+
+// Create godoc
+// @Summary Create user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body dto.CreateUserRequest true "User payload"
+// @Success 201 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "invalid request"
+// @Security BearerAuth
+// @Router /users [post]
 func (h *UserHandler) Create(c *gin.Context) {
 	var req dto.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -56,6 +89,18 @@ func (h *UserHandler) Create(c *gin.Context) {
 	}
 	respond(c, http.StatusCreated, "user created successfully", user)
 }
+
+// Update godoc
+// @Summary Update user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param request body dto.UpdateUserRequest true "User payload"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "invalid request"
+// @Security BearerAuth
+// @Router /users/{id} [put]
 func (h *UserHandler) Update(c *gin.Context) {
 	id, ok := userID(c)
 	if !ok {
